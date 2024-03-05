@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { CognitoUserPool, AuthenticationDetails, CognitoUser, ISignUpResult, NodeCallback } from 'amazon-cognito-identity-js';
+import { CognitoUserPool, AuthenticationDetails, CognitoUser, ISignUpResult, CognitoUserAttribute } from 'amazon-cognito-identity-js';
+
 
 @Injectable({
   providedIn: 'root',
@@ -12,18 +13,25 @@ export class AuthService {
 
   constructor() {}
 
-  register(username: string, password: string): Promise<ISignUpResult> {
+  register(username: string, email: string, password: string): Promise<ISignUpResult> {
+    const attributeList = [
+      new CognitoUserAttribute({
+        Name: 'email',
+        Value: email
+      })
+    ];
+  
     return new Promise((resolve, reject) => {
-      // Adjust the callback's type annotations
-      this.userPool.signUp(username, password, [], [], (err?: Error, result?: ISignUpResult) => {
-        if (err) {
-          reject(err);
+      this.userPool.signUp(username, password, attributeList, [], (err, result) => {
+        if (result) {
+          resolve(result);
         } else {
-          resolve(result as ISignUpResult); // Assert result as ISignUpResult to satisfy TypeScript
+          reject(new Error('Unknown error'));        
         }
       });
     });
   }
+  
 
   login(username: string, password: string): Promise<any> {
     const authenticationDetails = new AuthenticationDetails({
@@ -45,4 +53,39 @@ export class AuthService {
       });
     });
   }
+
+  confirmEmail(username: string, code: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const cognitoUser = new CognitoUser({
+        Username: username,
+        Pool: this.userPool,
+      });
+
+      cognitoUser.confirmRegistration(code, true, function(err, result) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result); // "SUCCESS"
+        }
+      });
+    });
+  }
+
+  resendVerificationCode(username: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const cognitoUser = new CognitoUser({
+        Username: username,
+        Pool: this.userPool,
+      });
+
+      cognitoUser.resendConfirmationCode(function(err, result) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result); // Success message or similar
+        }
+      });
+    });
+  }
+
 }
