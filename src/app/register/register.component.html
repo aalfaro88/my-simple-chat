@@ -1,0 +1,13 @@
+<!-- register.component.html -->
+<form [formGroup]="registerForm" (ngSubmit)="onRegister()">
+    <div>
+      <label for="username">Username:</label>
+      <input type="text" id="username" formControlName="username">
+    </div>
+    <div>
+      <label for="password">Password:</label>
+      <input type="password" id="password" formControlName="password">
+    </div>
+    <button type="submit" [disabled]="!registerForm.valid">Register</button>
+  </form>
+  
