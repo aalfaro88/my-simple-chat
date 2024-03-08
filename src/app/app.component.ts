@@ -1,34 +1,32 @@
-// app.component.ts
-import { Component, NgModule } from '@angular/core';
-import { NgIf } from '@angular/common';
-import { LoginComponent } from './login/login.component'; // Adjust path as needed
-import { RegisterComponent } from './register/register.component'; // Adjust path as needed
-import { RouterOutlet } from '@angular/router';
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink, RouterOutlet } from '@angular/router';
+import { AuthService } from './auth.service';
+import { Observable } from 'rxjs';
+import { NgZone } from '@angular/core';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    NgIf, // Import NgIf here
-    RouterOutlet,
-    LoginComponent,
-    RegisterComponent
-  ],
+  imports: [CommonModule, RouterOutlet, RouterLink],
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
-  title = 'simple-chat';
-  isLoggedIn = false;
-  showLogin = true;
+  isLoggedIn$: Observable<boolean>;
 
-  handleLoggedIn() {
-    this.isLoggedIn = true;
+  constructor(private authService: AuthService, private ngZone: NgZone) {
+    this.isLoggedIn$ = authService.isLoggedIn;
+
+    // Subscribe to isLoggedIn$ observable and use NgZone to run change detection
+    this.isLoggedIn$.subscribe((isLoggedIn) => {
+      this.ngZone.run(() => {
+        console.log("Authentication status changed to: ", isLoggedIn);
+      });
+    });
   }
 
-  toggleForm() {
-    this.showLogin = !this.showLogin;
-    console.log('Toggled showLogin to:', this.showLogin); // Debugging output
+  logout(): void {
+    this.authService.logout();
   }
-  
 }

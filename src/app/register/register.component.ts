@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../auth.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css'],
   providers: [AuthService]
@@ -31,17 +31,20 @@ export class RegisterComponent {
     });
   }
 
-  onRegister(): void {
-    if (this.registerForm.valid) {
-      const { username, email, password } = this.registerForm.value;
-      this.authService.register(username, email, password)
-        .then(() => {
-          console.log('Registration Success');
-          this.router.navigate(['/verify-email']); // Navigate to verification page
-        })
-        .catch(error => console.error('Registration Failure', error));
-    }
+// Inside your registration component
+onRegister(): void {
+  if (this.registerForm.valid) {
+    const { username, email, password } = this.registerForm.value;
+    this.authService.register(username, email, password)
+      .then(() => {
+        console.log('Registration Success');
+        // Navigate to verification page here
+        this.router.navigate(['/verify-email'], { queryParams: { username: username } });
+      })
+      .catch(error => console.error('Registration Failure', error));
   }
+}
+
 
   // Helper method to get form control for template
   get f() {

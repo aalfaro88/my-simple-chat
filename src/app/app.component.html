@@ -1,14 +1,14 @@
-<!-- app.component.html -->
-<div *ngIf="!isLoggedIn">
-  <app-login *ngIf="showLogin" (loggedIn)="handleLoggedIn()"></app-login>
-  <app-register *ngIf="!showLogin" (registered)="handleLoggedIn()"></app-register>
-  <button (click)="toggleForm()">Switch to {{ showLogin ? 'Register' : 'Login' }}</button>
-</div>
+<header>
+  <nav>
+    <!-- app.component.html -->
+    <a *ngIf="!(isLoggedIn$ | async)" routerLink="/login">Login</a>
+    <a *ngIf="!(isLoggedIn$ | async)" routerLink="/register">Register</a>
+    <a *ngIf="isLoggedIn$ | async" routerLink="/chat-room">Chat Room</a>
+    <button *ngIf="isLoggedIn$ | async" (click)="logout()">Logout</button>
+  </nav>
+</header>
+<router-outlet></router-outlet>
 
-
-<div *ngIf="isLoggedIn">
-  <p>Welcome! You are logged in.</p>
-</div>
-
-
-<router-outlet />
+<footer>
+  <p>© 2024 My Simple Chat</p>
+</footer>

@@ -1,35 +1,53 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../auth.service';
-import { Router } from '@angular/router';
-import { ReactiveFormsModule } from '@angular/forms'; // Make sure to import ReactiveFormsModule
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-verify-email',
   templateUrl: './verify-email.component.html',
   styleUrls: ['./verify-email.component.css'],
-  imports: [ReactiveFormsModule], // Add ReactiveFormsModule to the imports array
-  standalone: true, // Ensure your component is marked as standalone
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+  ],
+  standalone: true,
 })
 export class VerifyEmailComponent {
   verifyForm: FormGroup;
+  username: string | null = null;
 
-  constructor(private fb: FormBuilder, private authService: AuthService, private router: Router) {
+  constructor(
+    private fb: FormBuilder, 
+    private authService: AuthService, 
+    private router: Router,
+    private activatedRoute: ActivatedRoute // Inject ActivatedRoute here
+  ) {
+    this.activatedRoute.queryParams.subscribe(params => {
+      this.username = params['username'];
+    });
+
     this.verifyForm = this.fb.group({
-      username: ['', Validators.required],
       code: ['', Validators.required],
     });
   }
 
   onSubmit(): void {
     if (this.verifyForm.valid) {
-      const { username, code } = this.verifyForm.value;
-      this.authService.confirmEmail(username, code).then(() => {
-        console.log('Email verified successfully');
-        this.router.navigate(['/']); // Navigate to home or login page
-      }).catch((error) => {
-        console.error('Verification error:', error);
-      });
+      const { code } = this.verifyForm.value;
+      if (this.username) {
+        this.authService.confirmEmail(this.username, code)
+          .then(() => {
+            console.log('Email verified successfully');
+            this.router.navigate(['/chat-room']); 
+          })
+          .catch((error) => {
+            console.error('Verification error:', error);
+          });
+      } else {
+        console.error('Username is null');
+      }
     }
   }
 }
